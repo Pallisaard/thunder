@@ -1,44 +1,35 @@
 import abc
-from collections import defaultdict
-from collections.abc import Callable, Mapping
 from typing import Any, Generic, final
 from pathlib import Path
 
-import jax
-
-from optax import GradientTransformation
-from clu import metrics
 import orbax.checkpoint as ocp
 
 from thunder.utils import AutoInit
-from thunder.types import State, ArrayType
+from thunder.types import State
 
 
 class ThunderModule(AutoInit, Generic[State], abc.ABC):
     def __init__(self):
         super().__init__()
-        self.metrics_history: Mapping[str, list[int | float]] = defaultdict()
-        self.state = self.configure_state()
 
     @abc.abstractmethod
     def configure_state(self) -> State: ...
 
     @abc.abstractmethod
-    def train_step(self, state: State, x: Any, y: Any) -> State: ...
+    def train_step(self, state: State, batch: Any) -> State:
+        raise NotImplementedError(
+            "You must implement `train_step` to be able to train the model"
+        )
 
-    def validation_step(self, state: State, x: Any, y: Any) -> State:
+    def validation_step(self, state: State, batch: Any) -> State:
         raise NotImplementedError(
             "You must implement `validation_step` to be able to validate the model"
         )
 
-    def val_step(self, state: State, x: Any, y: Any) -> State:
-        return state
-
-    def test_step(self, state: State, x: Any, y: Any) -> State:
-        return state
-
-    def log(self, name: str, value: int | float) -> None:
-        self.metrics_history[name].append(value)
+    def test_step(self, state: State, batch: Any) -> State:
+        raise NotImplementedError(
+            "You must implement `test_step` to be able to test the model"
+        )
 
     @final
     def collect_metrics(self, state, **kwargs) -> State:
@@ -93,3 +84,15 @@ class ThunderModule(AutoInit, Generic[State], abc.ABC):
         state = checkpointer.restore(str(path))
 
         return state
+
+    @final
+    def log(self, state, name, value):
+        metrics_update = state.metrics.single_from_model_output(**{name: value})
+        new_metrics = state.metrics.merge(metrics_update)
+        state = state.replace(metrics=new_metrics)
+        return state
+
+    @final
+    def log_dict(self, state, metrics_dict):
+        for name, value in metrics_dict.items():
+            state = self.log(state, name, value)
