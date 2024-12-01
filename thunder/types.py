@@ -21,4 +21,3 @@ CollateFn = Callable[[ElmArray], ElmArray]
 
 
 State = TypeVar("State", bound=train_state.TrainState)
-Path = Union[str, pathlib.Path]
