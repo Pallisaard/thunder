@@ -1,3 +1,5 @@
-from thunder.utils.autoinitmeta import AutoInitMeta
+from thunder.utils.autoinitmeta import AutoInit
+# AutoInitMeta,
 
-__all__ = ["AutoInitMeta"]
+# "AutoInitMeta"
+__all__ = ["AutoInit"]

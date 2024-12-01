@@ -1,30 +1,32 @@
-import abc
 from typing import Generic, Iterator, Optional
-from thunder.utils import AutoInitMeta
-from thunder.types import T_co
+from thunder.utils import AutoInit
+from thunder.types import AnyDataType
 
 __all__ = ["Dataset", "IterableDataset"]
 
 
-class Dataset(abc.ABC, Generic[T_co], metaclass=AutoInitMeta):
+class Dataset(AutoInit, Generic[AnyDataType]):
     dtype: Optional[type] = None
 
-    @abc.abstractmethod
-    def getitem(self, index: int) -> T_co: ...
+    def getitem(self, index: int) -> AnyDataType:
+        raise NotImplementedError("Subclasses must implement `getitem(self, index)`.")
 
-    @abc.abstractmethod
-    def len(self) -> int: ...
+    def len(self) -> int:
+        raise NotImplementedError("Subclasses must implement `len(self)`.")
 
-    def __getitem__(self, index: int) -> T_co:
+    def __getitem__(self, index: int) -> AnyDataType:
         return self.getitem(index)
 
     def __len__(self) -> int:
         return self.len()
 
 
-class IterableDataset(abc.ABC, Generic[T_co], metaclass=AutoInitMeta):
-    @abc.abstractmethod
-    def iter(self) -> Iterator[T_co]: ...
+class IterableDataset(AutoInit, Generic[AnyDataType]):
+    def next(self) -> AnyDataType:
+        raise NotImplementedError("Subclasses must implement `next(self)`.")
 
-    def __iter__(self) -> Iterator[T_co]:
-        return self.iter()
+    def __iter__(self) -> Iterator[AnyDataType]:
+        return self
+
+    def __next__(self) -> AnyDataType:
+        return self.next()
