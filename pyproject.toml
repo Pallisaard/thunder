@@ -15,4 +15,6 @@ dependencies = [
     "pytest-randomly>=3.16.0",
     "pytest>=8.3.3",
     "pytest-cov>=6.0.0",
+    "notebook>=7.2.2",
+    "ipython>=8.30.0",
 ]
