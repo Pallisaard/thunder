@@ -1,5 +1,5 @@
-from thunder.dataset import Dataset
-from thunder.data_iterator import DataIterator
+from thunder.data.dataset import Dataset
+from thunder.data.data_iterator import DataIterator
 
 
 class FloatDataset(Dataset[float]):

@@ -1,4 +1,4 @@
-from thunder.dataset import Dataset, IterableDataset
+from thunder.data.dataset import Dataset, IterableDataset
 
 
 def test_make_standard_dataset():

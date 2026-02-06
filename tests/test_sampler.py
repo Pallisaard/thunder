@@ -1,5 +1,5 @@
 import pytest
-from thunder.sampler import PoissonSampler, RandomSampler, SequentialSampler
+from thunder.data.sampler import PoissonSampler, RandomSampler, SequentialSampler
 
 
 def test_random_sampler_no_replacement():
