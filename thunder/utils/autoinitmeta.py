@@ -2,6 +2,37 @@
 
 
 class AutoInit:
+    """Lightweight mixin that auto-populates instance attributes.
+
+    What it does on initialization:
+    - Copies all non-callable, non-dunder class attributes from the subclass
+      to the instance (useful for defaults like hyperparameters or schema).
+    - Assigns any keyword arguments passed to the constructor as attributes on
+      the instance.
+
+    How to use:
+    - Inherit from ``AutoInit`` and optionally define class attributes as
+      defaults.
+    - If you override ``__init__``, call ``super().__init__(**kwargs)`` to
+      enable the automatic assignment.
+
+    Example:
+        class ModelConfig(AutoInit):
+            lr: float = 1e-3
+            momentum: float = 0.9
+
+            def __init__(self, name: str, **kwargs):
+                super().__init__(**kwargs)
+                self.name = name
+
+        cfg = ModelConfig("resnet", batch_size=64)
+        # cfg.lr == 1e-3; cfg.momentum == 0.9; cfg.batch_size == 64; cfg.name == "resnet"
+
+    Notes:
+    - Mutable class attribute defaults are shared across instances; prefer
+      immutables or override in ``__init__``.
+    """
+
     def __init__(self, **kwargs):
         # Set all class-level attributes as instance attributes
         for key, value in self.__class__.__dict__.items():
@@ -10,44 +41,3 @@ class AutoInit:
         # Set all keyword arguments as instance attributes
         for key, value in kwargs.items():
             setattr(self, key, value)
-
-
-# class AutoInitMeta(abc.ABCMeta):
-#     """
-#     AutoInitMeta is a metaclass that automatically initializes instance attributes
-#     based on class-level attributes and keyword arguments passed to the constructor.
-
-#     When a class uses AutoInitMeta as its metaclass, the following behavior is added:
-#     - All class-level attributes that are not callable and do not start with "__"
-#         are set as instance attributes during initialization.
-#     - All keyword arguments passed to the constructor are set as instance attributes.
-
-#     Attributes:
-#             mcs: The metaclass.
-#             name: The name of the class being created.
-#             bases: A tuple containing the base classes of the class being created.
-#             namespace: A dictionary containing the class namespace.
-#             kwargs: Additional keyword arguments.
-
-#     Methods:
-#             __new__(mcs, name, bases, namespace, **kwargs): Creates a new class with the
-#             specified name, bases, and namespace, and modifies its __init__ method to
-#             automatically set instance attributes.
-#     """
-
-#     def __new__(mcs, name, bases, namespace, **kwargs):
-#         cls = super().__new__(mcs, name, bases, namespace, **kwargs)
-#         original_init = cls.__init__
-
-#         def __init__(self, *args, **kwargs):
-#             # Set all class-level attributes as instance attributes
-#             for key, value in cls.__dict__.items():
-#                 if not key.startswith("__") and not callable(value):
-#                     setattr(self, key, value)
-#             # Set all keyword arguments as instance attributes
-#             for key, value in kwargs.items():
-#                 setattr(self, key, value)
-#             original_init(self, *args, **kwargs)
-
-#         cls.__init__ = __init__
-#         return cls
